@@ -2,10 +2,11 @@ module github.com/mrkovshik/yandex_practicum_go_adv
 
 go 1.20
 
-require github.com/caarlos0/env/v6 v6.10.1 // indirect
+require github.com/caarlos0/env/v6 v6.10.1
 
 require (
 	github.com/go-resty/resty/v2 v2.11.0
+	github.com/golang/mock v1.6.0
 	github.com/stretchr/testify v1.9.0
 	go.uber.org/zap v1.27.0
 )
