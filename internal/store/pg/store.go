@@ -5,8 +5,11 @@ import (
 	"database/sql"
 	"fmt"
 	"strings"
+	"errors"
 	"time"
 
+	"github.com/jackc/pgerrcode"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/mrkovshik/yandex_practicum_go_adv/internal/store"
 )
 
@@ -160,6 +163,26 @@ func (s Store) SaveMessages(ctx context.Context, messages ...store.Message) erro
 
 	// добавляем новые сообщения в БД
 	_, err := s.conn.ExecContext(ctx, query, args...)
+
+	return err
+}
+
+func (s Store) RegisterUser(ctx context.Context, userID, username string) error {
+	// добавляем новую запись пользователя
+	_, err := s.conn.ExecContext(ctx, `
+        INSERT INTO users
+        (id, username)
+        VALUES
+        ($1, $2);
+    `, userID, username)
+
+	if err != nil {
+		// проверяем, что ошибка сигнализирует о потенциальном нарушении целостности данных
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) && pgerrcode.IsIntegrityConstraintViolation(pgErr.Code) {
+			err = store.ErrConflict
+		}
+	}
 
 	return err
 }
